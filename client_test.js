@@ -20,13 +20,7 @@ const getHeaders = (includeAuth = true) => {
         'Content-Type': 'application/json'
     };
     
-    if (includeAuth && authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`;
-    }
-    
-    if (!includeAuth) {
-        headers['x-api-key'] = config.apiKey;
-    }
+    headers['x-api-key'] = config.apiKey;
     
     return headers;
 };
@@ -70,36 +64,8 @@ const handleApiResponse = async (response) => {
 };
 
 const api = {
-    authenticate: async () => {
-        try {
-            console.log('Attempting authentication...');
-            const response = await fetch(endpoints.auth, {
-                method: 'POST',
-                headers: getHeaders(false)
-            });
-
-            await handleApiResponse(response);
-            const data = await response.json();
-            authToken = data.token;
-            console.log('Authentication successful');
-            return authToken;
-        } catch (error) {
-            console.error('Authentication error details:', {
-                message: error.message,
-                status: error.status,
-                response: error.response,
-                timestamp: error.timestamp
-            });
-            throw error;
-        }
-    },
-
     getData: async (filters = {}) => {
         try {
-            if (!authToken) {
-                console.log('No auth token found, attempting to authenticate...');
-                await api.authenticate();
-            }
 
             const url = new URL(endpoints.data);
             Object.keys(filters).forEach(key => 

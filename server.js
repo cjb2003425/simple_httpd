@@ -1,16 +1,12 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const fs = require('fs');
 
 const app = express();
 const port = 3010;
-const host = '192.168.1.2';
-
-// JWT secret key
-const JWT_SECRET = 'bb3e5dcc1836e006976942d7ddbc406ebc80fbd7f46254ccd344a296698f05f4';
+const host = '0.0.0.0';
 
 // Path to your JSON data file
-const dataFilePath = './data.json';
+const dataFilePath = '/root/http/data.json';
 
 // Function to get valid API keys from data file
 const getValidApiKeys = () => {
@@ -38,35 +34,13 @@ const verifyApiKey = (req, res, next) => {
     next();
 };
 
-// Middleware to verify JWT token
-const verifyToken = (req, res, next) => {
-    let token = req.headers['authorization'];
-
-    if (!token) {
-        return res.status(401).json({ error: 'No token provided' });
-    }
-
-    // Remove 'Bearer ' prefix if it exists
-    if (token.startsWith('Bearer ')) {
-        token = token.slice(7); // Remove 'Bearer ' (7 characters)
-    }
-
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
-        if (err) {
-            return res.status(401).json({ error: 'Invalid token' });
-        }
-        req.decoded = decoded;
-        next();
-    });
-};
-
 // Authentication endpoint
-app.post('/auth', verifyApiKey, (req, res) => {
+app.get('/auth', verifyApiKey, (req, res) => {
     res.json({ token: req.token });
 });
 
 // Get data endpoint
-app.get('/data', verifyToken, (req, res) => {
+app.get('/data', (req, res) => {
     try {
         // Check if query parameters exist
         if (Object.keys(req.query).length === 0) {
@@ -97,8 +71,6 @@ app.get('/data', verifyToken, (req, res) => {
     }
 });
 
-// Start server
 app.listen(port, host, () => {
     console.log(`Server running at http://${host}:${port}`);
 });
-
