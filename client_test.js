@@ -15,7 +15,7 @@ const endpoints = {
 let authToken = '';
 
 // Common headers
-const getHeaders = (includeAuth = true) => {
+const getHeaders = () => {
     const headers = {
         'Content-Type': 'application/json'
     };

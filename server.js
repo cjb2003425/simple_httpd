@@ -8,6 +8,8 @@ const host = '0.0.0.0';
 // Path to your JSON data file
 const dataFilePath = '/root/http/data.json';
 
+app.use('/update', express.static('update'));
+
 // Function to get valid API keys from data file
 const getValidApiKeys = () => {
     try {
@@ -34,11 +36,6 @@ const verifyApiKey = (req, res, next) => {
     next();
 };
 
-// Authentication endpoint
-app.get('/auth', verifyApiKey, (req, res) => {
-    res.json({ token: req.token });
-});
-
 // Get data endpoint
 app.get('/data', (req, res) => {
     try {
@@ -62,12 +59,25 @@ app.get('/data', (req, res) => {
         });
 
         // Return the filtered data
-        res.json(filteredData);
+        res.json(filteredData[0]);
     } catch (error) {
         res.status(500).json({ 
             error: 'Error reading data file',
             message: error.message 
         });
+    }
+});
+
+// Download specific file
+app.get('/update/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filePath = path.join(__dirname, 'update', filename);
+    
+    // Check if file exists
+    if (fs.existsSync(filePath)) {
+        res.download(filePath);
+    } else {
+        res.status(404).json({ error: 'File not found' });
     }
 });
 
